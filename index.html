@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💖 For Twishu — Will You Be My Valentine?</title>
+    <meta name="description" content="A romantic Valentine's Day surprise dedicated to Twishu.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ==================== FLOATING HEARTS BACKGROUND ==================== -->
+    <div class="hearts-bg" id="heartsBg"></div>
+
+    <!-- ==================== AMBIENT GLOW ORBS ==================== -->
+    <div class="ambient-glow ambient-glow-1"></div>
+    <div class="ambient-glow ambient-glow-2"></div>
+    <div class="ambient-glow ambient-glow-3"></div>
+
+    <!-- ==================== CURSOR HEART TRAIL ==================== -->
+    <div id="cursorTrail"></div>
+
+    <!-- ==================== NAVIGATION BAR ==================== -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-brand">💖 For Twishu</div>
+        <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">☰</button>
+        <ul class="nav-links" id="navLinks">
+        </ul>
+    </nav>
+
+    <!-- ==================== LANDING PAGE ==================== -->
+    <section class="page active" id="landingPage">
+        <div class="page-name">Landing</div>
+        <div class="landing-content">
+            <div class="sparkle-container">
+                <span class="sparkle">✨</span>
+                <span class="sparkle">💫</span>
+                <span class="sparkle">✨</span>
+            </div>
+            <h1 class="landing-title">Twishu,</h1>
+            <h2 class="landing-subtitle">will you be my Valentine?</h2>
+            <p class="landing-tagline">I've been thinking about this for a while... 💭</p>
+            <div class="btn-container" id="btnContainer">
+                <button class="btn btn-yes" id="btnYes" onclick="handleYes()">Yes 💖</button>
+                <button class="btn btn-no" id="btnNo">No 🙈</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== NO RESPONSE MODAL ==================== -->
+    <section class="page" id="noResponsePage">
+        <div class="page-name">Are You Sure?</div>
+        <div class="modal-card">
+            <div class="modal-emoji" id="noEmoji">🥺</div>
+            <h2 class="modal-title" id="noTitle">Are you sure?</h2>
+            <p class="modal-text" id="noText">Loading sweet message...</p>
+            <div class="btn-container">
+                <button class="btn btn-yes" onclick="handleYes()">Yes 💖</button>
+                <button class="btn btn-no" id="btnNoAgain">No 🙈</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FINAL NO PAGE (Only Yes) ==================== -->
+    <section class="page" id="finalNoPage">
+        <div class="page-name">Final Decision</div>
+        <div class="modal-card final-card">
+            <div class="modal-emoji">😢💔</div>
+            <h2 class="modal-title">Twishu...</h2>
+            <p class="modal-text">I literally can't take no for an answer because my heart only beats for you. So
+                there's only one option left... 💕</p>
+            <div class="btn-container">
+                <button class="btn btn-yes btn-big" onclick="handleYes()">Okay fine... Yes! 💖✨</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== LOVE LETTER PAGE ==================== -->
+    <section class="page" id="loveLetter">
+        <div class="page-name">Love Letter</div>
+        <div class="letter-container">
+            <div class="envelope" id="envelope">
+                <div class="envelope-flap"></div>
+                <div class="envelope-body">
+                    <p class="envelope-label">💌 A letter for you, Twishu</p>
+                </div>
+            </div>
+            <div class="letter-card" id="letterCard">
+                <h2 class="letter-heading">My Dearest Twishu 💕</h2>
+                <div class="letter-body">
+                    <p>From the moment I first noticed you, something in my world shifted. It wasn't loud or dramatic —
+                        it was like the softest melody starting to play in the background of my life.</p>
+                    <p>Your smile? It's my favorite thing. The way your eyes light up when you're happy makes everything
+                        around you glow. I don't think you even realize the effect you have on people — on me.</p>
+                    <p>I find myself thinking about you at the most random moments — wondering what you're doing, hoping
+                        you're smiling, imagining what it would be like to be the reason behind that smile.</p>
+                    <p>You make ordinary moments feel extraordinary. And that's rare. That's special. <strong>That's
+                            you.</strong></p>
+                    <p>I don't know what the future holds, but I know one thing for sure — I want you in it. 💖</p>
+                    <p class="letter-sign">Forever yours,<br>Your Secret (not so secret) Admirer 🌹</p>
+                </div>
+                <!-- Hover popup -->
+                <div class="letter-popup" id="letterPopup">
+                    <p>✨ P.S. — Every love story is beautiful, but ours could be my favorite. Every moment with you
+                        feels like a dream I never want to wake up from. You're not just someone I like — you're someone
+                        I see a future with. 💫</p>
+                </div>
+            </div>
+        </div>
+        <button class="btn-next" onclick="goToNextPage('reasonsPage')">Next →</button>
+    </section>
+
+    <!-- ==================== WHY I LIKE YOU PAGE ==================== -->
+    <section class="page" id="reasonsPage">
+        <div class="page-name">Why You</div>
+        <h2 class="section-title">Why I Like You 🌸</h2>
+        <p class="section-subtitle">Flip each card to discover a reason 💕</p>
+        <div class="cards-grid">
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"><span>😊</span>
+                        <p>Reason #1</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>Your smile makes my entire day brighter. It's like sunshine breaking through clouds. ☀️</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"><span>✨</span>
+                        <p>Reason #2</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>Your vibe is magnetic. You have this energy that pulls me in without even trying. 🧲</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"><span>❤️</span>
+                        <p>Reason #3</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>Talking to you is the best part of my day. I could listen to you forever. 💬</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"><span>🦋</span>
+                        <p>Reason #4</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>You give me butterflies — the kind that never go away. Every. Single. Time. 🦋</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"><span>🌙</span>
+                        <p>Reason #5</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>You're the last thought before I sleep and the first when I wake up. 🌙✨</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"><span>💫</span>
+                        <p>Reason #6</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>You're genuine, kind, and beautiful — inside and out. That's rare and I treasure it. 💎</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"><span>🎭</span>
+                        <p>Reason #7</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>Your sense of humor is everything. You make me laugh like no one else can. 😂💕</p>
+                    </div>
+                </div>
+            </div>
+            <div class="flip-card" onclick="this.classList.toggle('flipped')">
+                <div class="flip-card-inner">
+                    <div class="flip-card-front"><span>🌹</span>
+                        <p>Reason #8</p>
+                    </div>
+                    <div class="flip-card-back">
+                        <p>Simply put — you're the kind of person I want to build a future with. 🏡❤️</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-next" onclick="goToNextPage('dreamsPage')">Next →</button>
+    </section>
+
+    <!-- ==================== FUTURE DREAMS PAGE ==================== -->
+    <section class="page" id="dreamsPage">
+        <div class="page-name">Future Dreams</div>
+        <h2 class="section-title">Our Future Dreams 🌷</h2>
+        <p class="section-subtitle">Sweet moments I imagine with you 💭</p>
+        <div class="timeline">
+            <div class="timeline-item" data-aos="left">
+                <div class="timeline-icon">☕</div>
+                <div class="timeline-content">
+                    <h3>Coffee Dates</h3>
+                    <p>Cozy mornings together, sipping coffee, talking about everything and nothing. ☕💕</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="right">
+                <div class="timeline-icon">🎬</div>
+                <div class="timeline-content">
+                    <h3>Movie Nights</h3>
+                    <p>Sharing blankets, sneaking popcorn, and watching our favorite movies together. 🍿🎬</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="left">
+                <div class="timeline-icon">✈️</div>
+                <div class="timeline-content">
+                    <h3>Traveling Together</h3>
+                    <p>Exploring new places, creating memories, getting lost in beautiful cities. 🌍✨</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="right">
+                <div class="timeline-icon">🌅</div>
+                <div class="timeline-content">
+                    <h3>Sunset Walks</h3>
+                    <p>Walking hand in hand as the sky paints itself in shades of gold and pink. 🌅💖</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="left">
+                <div class="timeline-icon">🌃</div>
+                <div class="timeline-content">
+                    <h3>Late Night Talks</h3>
+                    <p>Sharing secrets, dreams, and silly jokes under starlit skies. 🌙⭐</p>
+                </div>
+            </div>
+            <div class="timeline-item" data-aos="right">
+                <div class="timeline-icon">🏡</div>
+                <div class="timeline-content">
+                    <h3>Building Our World</h3>
+                    <p>A cozy life together, filled with love, laughter, and endless adventures. 🏡❤️</p>
+                </div>
+            </div>
+        </div>
+        <button class="btn-next" onclick="goToNextPage('surprisePage')">Next →</button>
+    </section>
+
+    <!-- ==================== SECRET SURPRISE PAGE ==================== -->
+    <section class="page" id="surprisePage">
+        <div class="page-name">Secret Surprise</div>
+        <div class="surprise-container">
+            <h2 class="section-title">A Secret Surprise 🎁</h2>
+            <p class="section-subtitle">Find the hidden heart and tap it 5 times... 🤫</p>
+            <div class="surprise-area">
+                <div class="secret-heart" id="secretHeart" onclick="handleSecretClick()">
+                    <span>💖</span>
+                </div>
+                <div class="tap-counter" id="tapCounter">0 / 5</div>
+            </div>
+            <div class="secret-message" id="secretMessage">
+                <div class="secret-reveal">
+                    <h2>🎉 You Found It!</h2>
+                    <p>Here's my secret: From all the people in this world, my heart chose you. And it keeps choosing
+                        you, every single day. You're not just someone I like — you're someone I can't imagine my life
+                        without. 💖✨</p>
+                    <div class="secret-hearts-burst" id="secretBurst"></div>
+                </div>
+            </div>
+        </div>
+        <button class="btn-next" onclick="goToNextPage('proposalPage')">Next →</button>
+    </section>
+
+    <!-- ==================== FINAL PROPOSAL PAGE ==================== -->
+    <section class="page" id="proposalPage">
+        <div class="page-name">Proposal</div>
+        <div class="proposal-container">
+            <canvas id="confettiCanvas"></canvas>
+            <div class="proposal-content" id="proposalContent">
+                <div class="proposal-emoji">💍</div>
+                <h1 class="proposal-title">I Really Like You, Twishu</h1>
+                <p class="proposal-text">
+                    You make my heart race, my mind wander, and my days brighter.
+                    Every moment I spend thinking about you feels like the most beautiful part of my day.
+                    I don't need a perfect story — I just need you in it. 💕
+                </p>
+                <button class="btn btn-yes btn-proposal" onclick="triggerConfetti()">
+                    Yes, I'll Be Your Valentine! 💖🎉
+                </button>
+            </div>
+            <div class="post-confetti" id="postConfetti">
+                <h1>Yay!!! 🎉💖🥳</h1>
+                <p>You just made me the happiest person alive, Twishu! 🥹💕</p>
+                <p>This is the start of something beautiful... ✨</p>
+            </div>
+        </div>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
