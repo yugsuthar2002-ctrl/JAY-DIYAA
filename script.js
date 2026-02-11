@@ -1,13 +1,26 @@
 /* ============================================================
-   VALENTINE'S DAY WEBSITE — JAVASCRIPT
+   VALENTINE'S DAY WEBSITE — JAVASCRIPT OPTIMIZED
    Handles: No-button dodge, page transitions, music,
    card flip, secret surprise, confetti, floating hearts
+   Performance optimizations for mobile devices
    ============================================================ */
 
 // ===== STATE =====
 let noClickCount = 0;
 let secretTapCount = 0;
 let confettiRunning = false;
+let loveSongPlayed = false;
+let isPageVisible = true;
+let pickupLinePlayed = false; // Add state for pickup line
+
+// ===== DOM ELEMENTS CACHE =====
+const cache = {};
+function getElement(id) {
+    if (!cache[id]) {
+        cache[id] = document.getElementById(id);
+    }
+    return cache[id];
+}
 
 // ===== SWEET MESSAGES FOR "NO" CLICKS =====
 const noMessages = [
@@ -18,7 +31,7 @@ const noMessages = [
     },
     {
         emoji: '😢',
-        title: 'Really, Twishu?',
+        title: 'Really, Diya?',
         text: 'They say the best things in life are worth waiting for. I\'d wait forever for your "yes." Let me show you how much you mean to me... 🌹'
     },
     {
@@ -28,84 +41,102 @@ const noMessages = [
     }
 ];
 
-// ===== DOM ELEMENTS =====
-const btnNo = document.getElementById('btnNo');
-const btnNoAgain = document.getElementById('btnNoAgain');
-const navbar = document.getElementById('navbar');
-const navToggle = document.getElementById('navToggle');
-const navLinks = document.getElementById('navLinks');
-const envelope = document.getElementById('envelope');
-const letterCard = document.getElementById('letterCard');
-
 // ===== INITIALIZATION =====
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize core features
     createFloatingHearts();
     setupNoDodge();
     setupNavigation();
     setupEnvelope();
     setupCursorTrail();
+    setupLetterTypewriter();
+    // Removed setupPickupLineTyping() as it's now handled in showPage()
+    setupMusic();
+    setupTeddy();
+    setupScrollAnimations();
 
-    // Continuously generate floating hearts
-    setInterval(createFloatingHearts, 4000);
+    // Visibility API - pause heavy animations when tab is hidden
+    document.addEventListener('visibilitychange', () => {
+        isPageVisible = !document.hidden;
+    });
+
+    // Throttled floating hearts (less frequent on mobile)
+    const isMobile = window.innerWidth < 768;
+    const heartInterval = isMobile ? 6000 : 4000;
+    setInterval(createFloatingHearts, heartInterval);
 });
 
-// ===== FLOATING HEARTS BACKGROUND =====
+// ===== FLOATING HEARTS BACKGROUND - OPTIMIZED =====
 function createFloatingHearts() {
-    const container = document.getElementById('heartsBg');
-    const hearts = ['💕', '💖', '💗', '💝', '❤️', '💘', '🩷', '♥️'];
-    const count = 8;
+    if (!isPageVisible) return;
+
+    const container = getElement('heartsBg');
+    if (!container) return;
+
+    const isMobile = window.innerWidth < 768;
+    const hearts = ['💕', '💖', '💗', '💝', '❤️', '✨'];
+    const count = isMobile ? 5 : 8;
+
+    // Batch DOM operations
+    const fragment = document.createDocumentFragment();
 
     for (let i = 0; i < count; i++) {
         const heart = document.createElement('span');
         heart.className = 'floating-heart';
         heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
         heart.style.left = Math.random() * 100 + '%';
-        heart.style.fontSize = (Math.random() * 20 + 12) + 'px';
-        heart.style.animationDuration = (Math.random() * 8 + 7) + 's';
-        heart.style.animationDelay = (Math.random() * 5) + 's';
-        container.appendChild(heart);
+        heart.style.fontSize = (Math.random() * 15 + 12) + 'px';
+        heart.style.animationDuration = (Math.random() * 5 + 8) + 's';
+        heart.style.animationDelay = (Math.random() * 3) + 's';
 
-        // Remove after animation completes
+        fragment.appendChild(heart);
+
+        // Auto cleanup after animation
         setTimeout(() => {
             if (heart.parentNode) heart.parentNode.removeChild(heart);
-        }, 16000);
+        }, 15000);
     }
+
+    container.appendChild(fragment);
 }
 
-// ===== CURSOR HEART TRAIL =====
+// ===== CURSOR HEART TRAIL - OPTIMIZED =====
 function setupCursorTrail() {
     let lastTrail = 0;
+    const trailThreshold = 80; // ms throttle
+
     document.addEventListener('mousemove', (e) => {
+        if (!isPageVisible) return;
+
         const now = Date.now();
-        if (now - lastTrail < 80) return; // Throttle
+        if (now - lastTrail < trailThreshold) return;
         lastTrail = now;
 
         const trail = document.createElement('span');
         trail.className = 'cursor-heart';
-        trail.textContent = ['💕', '✨', '💖', '💗'][Math.floor(Math.random() * 4)];
+        trail.textContent = ['💕', '✨', '💖'][Math.floor(Math.random() * 3)];
         trail.style.left = e.clientX + 'px';
         trail.style.top = e.clientY + 'px';
         document.body.appendChild(trail);
 
         setTimeout(() => trail.remove(), 800);
-    });
+    }, { passive: true });
 }
 
 // ===== NO BUTTON — DODGE BEHAVIOR =====
 function setupNoDodge() {
-    // Landing page No button
-    addDodge(btnNo);
-    // Modal No button
-    addDodge(btnNoAgain);
+    addDodge(getElement('btnNo'));
+    addDodge(getElement('btnNoAgain'));
 }
 
 function addDodge(btn) {
     if (!btn) return;
 
+    const maxX = window.innerWidth - btn.offsetWidth - 20;
+    const maxY = window.innerHeight - btn.offsetHeight - 20;
+
     const dodge = (e) => {
         e.preventDefault();
-        const maxX = window.innerWidth - btn.offsetWidth - 20;
-        const maxY = window.innerHeight - btn.offsetHeight - 20;
         const newX = Math.random() * maxX;
         const newY = Math.max(100, Math.random() * maxY);
 
@@ -116,14 +147,12 @@ function addDodge(btn) {
         btn.style.transition = 'all 0.15s ease-out';
     };
 
-    btn.addEventListener('mouseover', dodge);
+    btn.addEventListener('mouseover', dodge, { passive: true });
     btn.addEventListener('touchstart', dodge, { passive: false });
 
-    // Allow click on No (for the 3-click flow)
     btn.addEventListener('click', (e) => {
         e.stopPropagation();
         handleNo();
-        // Reset position
         btn.style.position = '';
         btn.style.left = '';
         btn.style.top = '';
@@ -137,81 +166,92 @@ function handleNo() {
 
     if (noClickCount <= 3) {
         const msg = noMessages[noClickCount - 1];
-        document.getElementById('noEmoji').textContent = msg.emoji;
-        document.getElementById('noTitle').textContent = msg.title;
-        document.getElementById('noText').textContent = msg.text;
+        const noEmoji = getElement('noEmoji');
+        const noTitle = getElement('noTitle');
+        const noText = getElement('noText');
+
+        if (noEmoji) noEmoji.textContent = msg.emoji;
+        if (noTitle) noTitle.textContent = msg.title;
+        if (noText) noText.textContent = msg.text;
+
         showPage('noResponsePage');
     } else {
         showPage('finalNoPage');
+    }
+
+    // Log negative response
+    if (window.saveAnswer) {
+        window.saveAnswer("NO");
     }
 }
 
 // ===== HANDLE YES CLICK =====
 function handleYes() {
-    // Show navbar and navigate to love letter
-    navbar.classList.add('visible');
+    const navbar = getElement('navbar');
+    if (navbar) navbar.classList.add('visible');
+
+    // Log positive response
+    if (window.saveAnswer) {
+        window.saveAnswer("YES");
+    }
+
     showPage('loveLetter');
 }
 
-// ===== NEXT PAGE NAVIGATION =====
-function goToNextPage(pageId) {
-    if (pageId) {
-        showPage(pageId);
-    }
-}
-
-// ===== PAGE NAVIGATION =====
+// ===== PAGE NAVIGATION - OPTIMIZED =====
 function showPage(pageId) {
     const pages = document.querySelectorAll('.page');
     const currentPage = document.querySelector('.page.active');
-    const target = document.getElementById(pageId);
+    const target = getElement(pageId);
 
     if (!target || target === currentPage) return;
 
-    // Add exit animation to current page
     if (currentPage) {
         currentPage.classList.remove('active');
         currentPage.classList.add('page-exit');
-
-        // Remove exit class and reset animation after transition
         setTimeout(() => {
             currentPage.classList.remove('page-exit');
         }, 400);
     }
 
-    // Show target page with animation
     setTimeout(() => {
         target.classList.add('active');
-        // Re-trigger animation
         target.style.animation = 'none';
-        target.offsetHeight; // Force reflow
+        target.offsetHeight;
         target.style.animation = '';
+
+        if (pageId === 'proposalPage' && !loveSongPlayed) {
+            playLoveSong();
+        }
+
+        // Trigger pickup line animation if switching to that page
+        if (pageId === 'pickupLinePage' && !pickupLinePlayed) {
+            pickupLinePlayed = true;
+            startPickupLineAnimation();
+        }
     }, currentPage ? 150 : 0);
 
-    // Close mobile nav
-    navLinks.classList.remove('open');
-
-    // Scroll to top
+    const navLinks = getElement('navLinks');
+    if (navLinks) navLinks.classList.remove('open');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goToNextPage(pageId) {
+    if (pageId) showPage(pageId);
 }
 
 // ===== NAVBAR SETUP =====
 function setupNavigation() {
-    // Nav link clicks
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const pageId = link.getAttribute('data-page');
-            showPage(pageId);
-        });
-    });
+    const navToggle = getElement('navToggle');
+    const navLinks = getElement('navLinks');
+    const navbar = getElement('navbar');
 
-    // Mobile toggle
+    if (!navToggle || !navLinks || !navbar) return;
+
     navToggle.addEventListener('click', () => {
         navLinks.classList.toggle('open');
     });
 
-    // Close nav on outside click
     document.addEventListener('click', (e) => {
         if (!navbar.contains(e.target)) {
             navLinks.classList.remove('open');
@@ -221,6 +261,9 @@ function setupNavigation() {
 
 // ===== ENVELOPE INTERACTION =====
 function setupEnvelope() {
+    const envelope = getElement('envelope');
+    const letterCard = getElement('letterCard');
+
     if (!envelope || !letterCard) return;
 
     envelope.addEventListener('click', () => {
@@ -229,110 +272,114 @@ function setupEnvelope() {
             envelope.style.display = 'none';
             letterCard.classList.add('visible');
         }, 600);
-    });
+    }, { passive: true });
 }
 
 // ===== SECRET SURPRISE HEART =====
 function handleSecretClick() {
     secretTapCount++;
-    const counter = document.getElementById('tapCounter');
-    const message = document.getElementById('secretMessage');
-    const heart = document.getElementById('secretHeart');
+    const counter = getElement('tapCounter');
+    const message = getElement('secretMessage');
+    const heart = getElement('secretHeart');
 
-    counter.textContent = `${Math.min(secretTapCount, 5)} / 5`;
+    if (counter) counter.textContent = `${Math.min(secretTapCount, 5)} / 5`;
 
-    // Pulse effect on tap
-    heart.style.transform = 'scale(1.3)';
-    setTimeout(() => heart.style.transform = '', 200);
+    if (heart) {
+        heart.style.transform = 'scale(1.3)';
+        setTimeout(() => heart.style.transform = '', 200);
+    }
 
     if (secretTapCount >= 5) {
-        heart.style.display = 'none';
-        counter.style.display = 'none';
-        message.classList.add('visible');
-
-        // Hearts burst
+        if (heart) heart.style.display = 'none';
+        if (counter) counter.style.display = 'none';
+        if (message) message.classList.add('visible');
         createHeartBurst();
     }
 }
 
 function createHeartBurst() {
-    const burst = document.getElementById('secretBurst');
+    const burst = getElement('secretBurst');
     if (!burst) return;
 
-    for (let i = 0; i < 20; i++) {
+    // Reduced particle count for performance
+    const count = 15;
+    const hearts = ['💖', '💕', '✨', '💗'];
+
+    for (let i = 0; i < count; i++) {
         const h = document.createElement('span');
-        h.textContent = ['💖', '💕', '✨', '💗', '❤️'][Math.floor(Math.random() * 5)];
+        h.textContent = hearts[Math.floor(Math.random() * hearts.length)];
         h.style.position = 'absolute';
-        h.style.fontSize = (Math.random() * 20 + 12) + 'px';
+        h.style.fontSize = (Math.random() * 15 + 10) + 'px';
         h.style.left = '50%';
         h.style.top = '50%';
         h.style.pointerEvents = 'none';
-        h.style.animation = `burstHeart 1.2s ease-out ${i * 0.05}s forwards`;
+        h.style.animation = `burstHeart 1s ease-out ${i * 0.04}s forwards`;
 
-        // Random direction
-        const angle = (Math.PI * 2 * i) / 20;
-        const distance = Math.random() * 120 + 60;
+        const angle = (Math.PI * 2 * i) / count;
+        const distance = Math.random() * 80 + 50;
         h.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
         h.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
 
         burst.appendChild(h);
     }
 
-    // Add burst animation style dynamically
-    if (!document.getElementById('burstStyle')) {
+    // Only add style once
+    if (!getElement('burstStyle')) {
         const style = document.createElement('style');
         style.id = 'burstStyle';
         style.textContent = `
             @keyframes burstHeart {
                 0% { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
                 50% { opacity: 1; }
-                100% {
-                    opacity: 0;
-                    transform: translate(
-                        calc(-50% + var(--tx)),
-                        calc(-50% + var(--ty))
-                    ) scale(1.2);
-                }
+                100% { opacity: 0; transform: translate(calc(-50% + var(--tx)), calc(-50% + var(--ty))) scale(1.2); }
             }
         `;
         document.head.appendChild(style);
     }
 }
 
-// ===== CONFETTI / HEART EXPLOSION =====
+// ===== CONFETTI / HEART EXPLOSION - OPTIMIZED =====
 function triggerConfetti() {
-    const canvas = document.getElementById('confettiCanvas');
+    const canvas = getElement('confettiCanvas');
+    if (!canvas) return;
+
     const ctx = canvas.getContext('2d');
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const proposalContent = document.getElementById('proposalContent');
-    const postConfetti = document.getElementById('postConfetti');
+    const proposalContent = getElement('proposalContent');
+    const postConfetti = getElement('postConfetti');
 
-    proposalContent.style.display = 'none';
-    postConfetti.classList.add('visible');
+    if (proposalContent) proposalContent.style.display = 'none';
+    if (postConfetti) postConfetti.classList.add('visible');
 
     if (confettiRunning) return;
     confettiRunning = true;
 
-    const particles = [];
-    const colors = ['#ff69b4', '#ff1493', '#c71585', '#ffb6c1', '#ff6b9d', '#e91e63', '#f48fb1'];
+    if (typeof launchFireworks === 'function') {
+        launchFireworks();
+    }
 
-    // Create particles
-    for (let i = 0; i < 150; i++) {
+    const particles = [];
+    const colors = ['#ff69b4', '#ff1493', '#c71585', '#ffb6c1', '#e91e63'];
+
+    // Reduced particle count
+    const particleCount = 100;
+
+    for (let i = 0; i < particleCount; i++) {
         particles.push({
             x: canvas.width / 2,
             y: canvas.height / 2,
-            vx: (Math.random() - 0.5) * 20,
-            vy: (Math.random() - 0.5) * 20 - 5,
+            vx: (Math.random() - 0.5) * 15,
+            vy: (Math.random() - 0.5) * 15 - 5,
             color: colors[Math.floor(Math.random() * colors.length)],
-            size: Math.random() * 8 + 4,
+            size: Math.random() * 6 + 3,
             rotation: Math.random() * 360,
-            rotSpeed: (Math.random() - 0.5) * 10,
-            gravity: 0.15,
+            rotSpeed: (Math.random() - 0.5) * 8,
+            gravity: 0.12,
             friction: 0.99,
             life: 1,
-            decay: Math.random() * 0.01 + 0.005,
+            decay: Math.random() * 0.008 + 0.005,
             isHeart: Math.random() > 0.5
         });
     }
@@ -351,11 +398,18 @@ function triggerConfetti() {
     }
 
     function animate() {
+        if (!isPageVisible) {
+            requestAnimationFrame(animate);
+            return;
+        }
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
         let active = false;
-        particles.forEach(p => {
-            if (p.life <= 0) return;
+
+        for (let i = 0; i < particles.length; i++) {
+            const p = particles[i];
+            if (p.life <= 0) continue;
             active = true;
 
             p.x += p.vx;
@@ -377,7 +431,7 @@ function triggerConfetti() {
                 ctx.restore();
             }
             ctx.globalAlpha = 1;
-        });
+        }
 
         if (active) {
             requestAnimationFrame(animate);
@@ -390,11 +444,180 @@ function triggerConfetti() {
     animate();
 }
 
-// ===== HANDLE WINDOW RESIZE FOR CONFETTI CANVAS =====
+// ===== TYPEWRITER EFFECT - OPTIMIZED =====
+function typeWriter(element, text, speed = 25) {
+    element.innerHTML = '';
+    let i = 0;
+
+    function type() {
+        if (i < text.length) {
+            element.innerHTML += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        }
+    }
+    type();
+}
+
+function setupLetterTypewriter() {
+    const letterBody = document.querySelector('.letter-body');
+    if (!letterBody) return;
+
+    const paragraphs = letterBody.querySelectorAll('p');
+    const originalTexts = Array.from(paragraphs).map(p => p.innerHTML);
+
+    paragraphs.forEach(p => p.innerHTML = '');
+
+    const envelope = getElement('envelope');
+    if (envelope) {
+        envelope.addEventListener('click', () => {
+            setTimeout(() => {
+                let delay = 0;
+                paragraphs.forEach((p, index) => {
+                    setTimeout(() => {
+                        typeWriter(p, originalTexts[index], 15);
+                    }, delay);
+                    delay += originalTexts[index].length * 15 + 200;
+                });
+            }, 800);
+        }, { passive: true });
+    }
+}
+
+// ===== PICKUP LINE ANIMATION - OPTIMIZED =====
+// Function called directly from showPage so no MutationObserver needed
+function startPickupLineAnimation() {
+    const textContainer = getElement('pickupLineText');
+    const nextBtn = getElement('pickupLineNextBtn');
+
+    if (!textContainer || !nextBtn) return;
+
+    const paragraphs = [
+        '✨ Tum perfect ho ya nahi, honestly mujhe pata nahi…',
+        'aur shayad perfection matter bhi nahi karta.',
+        'Par itna zaroor pata hai ke mere liye tum definitely special ho.',
+        'Tumhari vibe, tumhari smile, tumhari simplicity —',
+        'sab milke tumhe mere liye thodi extra important bana deti hai ❤️'
+    ];
+
+    textContainer.innerHTML = '';
+    nextBtn.style.display = 'none';
+
+    // Batch paragraph creation
+    const fragment = document.createDocumentFragment();
+
+    paragraphs.forEach((para, index) => {
+        const p = document.createElement('p');
+        p.textContent = para;
+        p.style.opacity = '0';
+        p.style.animation = `fadeInUp 0.4s ease-out ${index * 0.25}s forwards`;
+        fragment.appendChild(p);
+    });
+
+    textContainer.appendChild(fragment);
+
+    setTimeout(() => {
+        nextBtn.style.display = 'block';
+        nextBtn.style.animation = 'pageEnter 0.5s ease-out';
+    }, paragraphs.length * 250 + 400);
+}
+
+// ===== MUSIC CONTROL =====
+function setupMusic() {
+    const musicBtn = getElement('musicToggle');
+    const bgMusic = getElement('bgMusic');
+
+    if (!musicBtn || !bgMusic) return;
+
+    bgMusic.volume = 0.3;
+
+    musicBtn.addEventListener('click', () => {
+        if (bgMusic.paused) {
+            bgMusic.play().then(() => {
+                musicBtn.classList.add('playing');
+                musicBtn.innerHTML = '❚❚';
+            }).catch(() => { });
+        } else {
+            bgMusic.pause();
+            musicBtn.classList.remove('playing');
+            musicBtn.innerHTML = '🎵';
+        }
+    }, { passive: true });
+}
+
+function playLoveSong() {
+    const loveSong = getElement('loveSong');
+    if (!loveSong) return;
+
+    loveSong.volume = 0.5;
+    loveSong.play().then(() => {
+        loveSongPlayed = true;
+    }).catch(() => { });
+}
+
+// ===== TEDDY POPUP =====
+function setupTeddy() {
+    const teddyBtn = getElement('teddyBtn');
+    const teddyPopup = getElement('teddyPopup');
+
+    if (!teddyBtn || !teddyPopup) return;
+
+    teddyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        teddyPopup.classList.toggle('visible');
+    }, { passive: true });
+
+    document.addEventListener('click', (e) => {
+        if (!teddyBtn.contains(e.target)) {
+            teddyPopup.classList.remove('visible');
+        }
+    });
+}
+
+// ===== SCROLL ANIMATIONS =====
+function setupScrollAnimations() {
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('scroll-visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    const animatedElements = document.querySelectorAll('.timeline-item, .flip-card, .section-title');
+    animatedElements.forEach(el => {
+        el.classList.add('scroll-hidden');
+        observer.observe(el);
+    });
+}
+
+// ===== WINDOW RESIZE HANDLER =====
 window.addEventListener('resize', () => {
-    const canvas = document.getElementById('confettiCanvas');
+    const canvas = getElement('confettiCanvas');
     if (canvas) {
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+    }
+}, { passive: true });
+
+// ===== FLIP CARD ACCORDION BEHAVIOR =====
+function handleCardFlip(card) {
+    // Close all other open cards
+    const allCards = document.querySelectorAll('.flip-card');
+    allCards.forEach(c => {
+        if (c !== card && c.classList.contains('flipped')) {
+            c.classList.remove('flipped');
+        }
+    });
+    card.classList.toggle('flipped');
+}
+
+// ===== FIREBASE VISIT TRACKING =====
+// Note: This runs after DOMContentLoaded because script.js is defer-like or at end of body,
+// but firebase-integration.js is type="module" so it might run slightly later or earlier.
+// We'll try to log if available, or set a small timeout.
+window.addEventListener('load', () => {
+    if (window.firebaseLogger && window.firebaseLogger.logVisit) {
+        window.firebaseLogger.logVisit();
     }
 });

@@ -164,8 +164,8 @@ body {
     opacity: 0;
     animation: floatUp linear forwards;
     pointer-events: none;
-    filter: blur(0.5px);
-    text-shadow: 0 0 10px rgba(255, 105, 180, 0.5);
+    filter: drop-shadow(0 0 8px rgba(255, 105, 180, 0.6));
+    will-change: transform, opacity;
 }
 
 @keyframes floatUp {
@@ -752,39 +752,37 @@ body {
     letter-spacing: 2px;
 }
 
-/* Letter hover popup */
-.letter-popup {
-    position: absolute;
-    bottom: -20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100%) scale(0.9);
-    background: linear-gradient(135deg, rgba(255, 20, 147, 0.9), rgba(199, 21, 133, 0.9));
-    backdrop-filter: blur(20px);
-    border-radius: 20px;
-    padding: 25px 30px;
-    width: 90%;
-    max-width: 500px;
-    opacity: 0;
-    pointer-events: none;
-    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 0 10px 40px rgba(255, 20, 147, 0.4);
-    z-index: 10;
-}
-
-.letter-card:hover .letter-popup {
-    opacity: 1;
-    transform: translateX(-50%) translateY(100%) scale(1);
-    pointer-events: auto;
-}
-
-.letter-popup p {
-    color: white;
-    line-height: 1.7;
-    font-weight: 400;
-    font-size: 0.95rem;
+/* ===== PICKUP LINE ===== */
+.pickup-line-container {
+    max-width: 700px;
+    width: 95%;
     text-align: center;
-    font-family: var(--font-body);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
 }
+
+.pickup-line-text {
+    font-family: var(--font-body);
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    line-height: 1.8;
+    text-align: center;
+    min-height: 150px;
+    padding: 20px;
+}
+
+.pickup-line-text p {
+    margin-bottom: 15px;
+}
+
+.pickup-line-text p:last-child {
+    margin-bottom: 0;
+}
+
+
 
 /* ===== FLIP CARDS ===== */
 .cards-grid {
@@ -1485,4 +1483,164 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--pink-deep);
+}
+
+/* ===== MUSIC CONTROL ===== */
+.music-control {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 1.5rem;
+    color: var(--pink-deep);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    animation: musicPulse 3s infinite ease-in-out;
+}
+
+.music-control:hover {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.6);
+}
+
+.music-control.playing {
+    border-color: var(--pink-mid);
+    background: rgba(255, 105, 180, 0.2);
+    animation: spin 8s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes musicPulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 10px rgba(255, 105, 180, 0.3);
+    }
+
+    50% {
+        box-shadow: 0 0 25px rgba(255, 105, 180, 0.6);
+    }
+}
+
+/* ===== TEDDY BEAR ===== */
+.teddy-container {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.teddy-icon {
+    font-size: 3.5rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+    animation: teddyBounce 3s infinite ease-in-out;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.teddy-container:hover .teddy-icon {
+    transform: scale(1.2) rotate(10deg);
+}
+
+.teddy-popup {
+    position: absolute;
+    bottom: 70px;
+    right: 0;
+    width: 250px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    border-bottom-right-radius: 5px;
+    padding: 20px;
+    box-shadow: var(--shadow-lg);
+    opacity: 0;
+    transform: translateY(20px) scale(0.9);
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.teddy-popup.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+.teddy-popup p {
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+
+@keyframes teddyBounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* ===== SCROLL ANIMATIONS ===== */
+.scroll-hidden {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.scroll-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* ===== FADE IN UP ANIMATION ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ===== FADE IN ANIMATION ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
